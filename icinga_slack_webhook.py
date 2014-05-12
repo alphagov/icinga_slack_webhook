@@ -43,7 +43,7 @@ class AttachmentList(list):
 
 
 class Message(dict):
-    def __init__(self, channel, text='Received the following alert:', mrkdwn_in=["fields"], username="Icinga",
+    def __init__(self, channel, text, mrkdwn_in=["fields"], username="Icinga",
                  icon_emoji=":ghost:", attachments=None):
         self['channel'] = channel
         self['text'] = text
@@ -88,6 +88,7 @@ def parse_options():
     parser.add_argument('-c', metavar="CHANNEL", type=str, required=True, help="The channel to send the message to")
     parser.add_argument('-m', metavar="MESSAGE", type=str, required=True, help="The text of the message to send")
     parser.add_argument('-H', metavar="HOST", type=str, default="UNKNOWN", help="An optional host the message relates to {default: UNKNOWN}")
+    parser.add_argument('-M', metavar="HEADERMESSAGE", type=str, default="I have received the following alert:", help="A header message sent before the formatted alert {default: I have received the following alert:}")
     parser.add_argument('-l', metavar="LEVEL", type=str, choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"], default="UNKNOWN",
                         help="An optional alert level {default: UNKNOWN}")
     parser.add_argument('-A', metavar="SERVICEACTIONURL", type=str, default=None, help="An optional action_url for this alert {default: None}")
@@ -100,7 +101,7 @@ def parse_options():
 
 if __name__ == "__main__":
     args = parse_options()
-    message = Message(channel=args.c)
+    message = Message(channel=args.c, text=args.M)
     message.attach(message=args.m, host=args.H, level=args.l, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
     if message.send(subdomain=args.s, token=args.t):
         sys.exit(0)
