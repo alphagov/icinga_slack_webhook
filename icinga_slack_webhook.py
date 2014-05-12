@@ -53,11 +53,12 @@ class Message(dict):
             self['username'] = username
         if icon_emoji:
             self['icon_emoji'] = icon_emoji
+        self['attachments'] = AttachmentList()
 
-    def attach(self, message, host, level, action_url=None, notes_url=None):
+    def attach(self, message, host, level, action_url=None, notes_url=None, status_cgi_url=''):
         fields = AttachmentFieldList()
         fields.append(AttachmentField("Message", message))
-        fields.append(AttachmentField("Host", "<https://nagios.example.com/cgi-bin/icinga/status.cgi?host={0}|{0}>".format(host), True))
+        fields.append(AttachmentField("Host", "<{1}?host={0}|{0}>".format(host, status_cgi_url), True))
         fields.append(AttachmentField("Level", level, True))
         if action_url:
             fields.append(AttachmentField("Actions URL", action_url, True))
@@ -68,7 +69,7 @@ class Message(dict):
         else:
             color = alert_colors['UNKNOWN']
         alert_attachment = Attachment(fallback="    {0} on {1} is {2}".format(message, host, level), color=color, fields=fields)
-        self['attachments'] = AttachmentList(alert_attachment)
+        self['attachments'].append(alert_attachment)
 
     def send(self, subdomain, token):
         data = urllib.urlencode({"payload": json.dumps(self)})
@@ -82,14 +83,17 @@ class Message(dict):
 
 def parse_options():
     parser = argparse.ArgumentParser(description="Send an Icinga Alert to Slack.com")
-    parser.add_argument('-s', metavar="SUBDOMAIN", type=str, required=True)
-    parser.add_argument('-t', metavar="TOKEN", type=str, required=True)
-    parser.add_argument('-c', metavar="CHANNEL", type=str, required=True)
-    parser.add_argument('-m', metavar="MESSAGE", type=str, required=True)
-    parser.add_argument('-H', metavar="HOST", type=str, default="UNKNOWN")
-    parser.add_argument('-l', metavar="LEVEL", type=str, choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"], default="UNKNOWN")
-    parser.add_argument('-A', metavar="SERVICEACTIONURL", type=str, default=None)
-    parser.add_argument('-N', metavar="SERVICENOTESURL", type=str, default=None)
+    parser.add_argument('-s', metavar="SUBDOMAIN", type=str, required=True, help="Slack.com subdomain")
+    parser.add_argument('-t', metavar="TOKEN", type=str, required=True, help="The access token for your integration")
+    parser.add_argument('-c', metavar="CHANNEL", type=str, required=True, help="The channel to send the message to")
+    parser.add_argument('-m', metavar="MESSAGE", type=str, required=True, help="The text of the message to send")
+    parser.add_argument('-H', metavar="HOST", type=str, default="UNKNOWN", help="An optional host the message relates to {default: UNKNOWN}")
+    parser.add_argument('-l', metavar="LEVEL", type=str, choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"], default="UNKNOWN",
+                        help="An optional alert level {default: UNKNOWN}")
+    parser.add_argument('-A', metavar="SERVICEACTIONURL", type=str, default=None, help="An optional action_url for this alert {default: None}")
+    parser.add_argument('-N', metavar="SERVICENOTESURL", type=str, default=None, help="An optional notes_url for this alert {default: None}")
+    parser.add_argument('-S', metavar="STATUSCGIURL", type=str, default='https://nagios.example.com/cgi-bin/icinga/status.cgi',
+                        help="The URL of status.cgi for your Nagios/Icinga instance {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}")
     args = parser.parse_args()
     return args
 
@@ -97,7 +101,7 @@ def parse_options():
 if __name__ == "__main__":
     args = parse_options()
     message = Message(channel=args.c)
-    message.attach(message=args.m, host=args.H, level=args.l, action_url=args.A, notes_url=args.N)
+    message.attach(message=args.m, host=args.H, level=args.l, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
     if message.send(subdomain=args.s, token=args.t):
         sys.exit(0)
     else:
