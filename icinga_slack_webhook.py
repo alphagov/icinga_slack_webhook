@@ -43,7 +43,7 @@ class AttachmentList(list):
 
 
 class Message(dict):
-    def __init__(self, channel, text, mrkdwn_in=["fields"], username="Icinga",
+    def __init__(self, channel, text, username, mrkdwn_in=["fields"],
                  icon_emoji=":ghost:", attachments=None):
         self['channel'] = channel
         self['text'] = text
@@ -95,13 +95,14 @@ def parse_options():
     parser.add_argument('-N', metavar="SERVICENOTESURL", type=str, default=None, help="An optional notes_url for this alert {default: None}")
     parser.add_argument('-S', metavar="STATUSCGIURL", type=str, default='https://nagios.example.com/cgi-bin/icinga/status.cgi',
                         help="The URL of status.cgi for your Nagios/Icinga instance {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}")
+    parser.add_argument('-U', metavar="USERNAME", type=str, default="Icinga", help="Username to send the message from {default: Icinga}")
     args = parser.parse_args()
     return args
 
 
 if __name__ == "__main__":
     args = parse_options()
-    message = Message(channel=args.c, text=args.M)
+    message = Message(channel=args.c, text=args.M, username=args.U)
     message.attach(message=args.m, host=args.H, level=args.l, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
     if message.send(subdomain=args.s, token=args.t):
         sys.exit(0)
