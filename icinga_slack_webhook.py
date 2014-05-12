@@ -5,6 +5,11 @@ import json
 import urllib
 import sys
 
+alert_colors = {'UNKNOWN': '#6600CC',
+                'CRITICAL': '#FF0000',
+                'WARNING': '#FF9900',
+                'OK': '#00FF00'}
+
 
 class AttachmentField(dict):
     def __init__(self, title, value, short=False):
@@ -37,9 +42,9 @@ class AttachmentList(list):
             self.append(attachment)
 
 
-class Payload(dict):
-    def __init__(self, channel, text, mrkdwn_in=None, username=None,
-                 icon_emoji=None, attachments=None):
+class Message(dict):
+    def __init__(self, channel, text='Received the following alert:', mrkdwn_in=["fields"], username="Icinga",
+                 icon_emoji=":ghost:", attachments=None):
         self['channel'] = channel
         self['text'] = text
         if mrkdwn_in:
@@ -48,50 +53,31 @@ class Payload(dict):
             self['username'] = username
         if icon_emoji:
             self['icon_emoji'] = icon_emoji
-        if attachments:
-            self['attachments'] = attachments
 
+    def attach(self, message, host, level, action_url=None, notes_url=None):
+        fields = AttachmentFieldList()
+        fields.append(AttachmentField("Message", message))
+        fields.append(AttachmentField("Host", "<https://nagios.example.com/cgi-bin/icinga/status.cgi?host={0}|{0}>".format(host), True))
+        fields.append(AttachmentField("Level", level, True))
+        if action_url:
+            fields.append(AttachmentField("Actions URL", action_url, True))
+        if notes_url:
+            fields.append(AttachmentField("Notes URL", notes_url, True))
+        if level in alert_colors.keys():
+            color = alert_colors[level]
+        else:
+            color = alert_colors['UNKNOWN']
+        alert_attachment = Attachment(fallback="    {0} on {1} is {2}".format(message, host, level), color=color, fields=fields)
+        self['attachments'] = AttachmentList(alert_attachment)
 
-def format_alert_attachment_list(message, host, level,
-                                 action_url=None, notes_url=None):
-    fields = AttachmentFieldList()
-    fields.append(AttachmentField("Message", message))
-    fields.append(AttachmentField("Host", "<https://nagios.example.com/cgi-bin/icinga/status.cgi?host={0}|{0}>".format(host), True))
-    fields.append(AttachmentField("Level", level, True))
-    if action_url:
-        fields.append(AttachmentField("Actions URL", action_url, True))
-    if notes_url:
-        fields.append(AttachmentField("Notes URL", notes_url, True))
-
-    if level == "CRITICAL":
-        color = "#FF0000"
-    elif level == "WARNING":
-        color = "#FF6600"
-    elif level == "OK":
-        color = "#00FF00"
-    else:
-        color = "#6600CC"
-
-    alert_attachment = Attachment(fallback="    {0} on {1} is {2}".format(message, host, level), color=color, fields=fields)
-    return AttachmentList(alert_attachment)
-
-
-def create_url_payload(channel, message, host, level, action_url=None, notes_url=None):
-    payload = Payload(channel=channel, text='Service status message received:',
-                      mrkdwn_in=["fields"], username="Icinga", icon_emoji=":ghost:",
-                      attachments=format_alert_attachment_list(message, host, level, action_url, notes_url))
-    data = urllib.urlencode({"payload": json.dumps(payload)})
-    return data
-
-
-def send_slack_message(subdomain, token, channel, message, host, level, action_url=None, notes_url=None):
-    data = create_url_payload(channel, message, host, level, action_url, notes_url)
-    response = urllib.urlopen('https://{0}.slack.com/services/hooks/incoming-webhook?token={1}'.format(subdomain, token), data).read()
-    if response == "ok":
-        return True
-    else:
-        print "Error: %s" % response
-        return False
+    def send(self, subdomain, token):
+        data = urllib.urlencode({"payload": json.dumps(self)})
+        response = urllib.urlopen('https://{0}.slack.com/services/hooks/incoming-webhook?token={1}'.format(subdomain, token), data).read()
+        if response == "ok":
+            return True
+        else:
+            print "Error: %s" % response
+            return False
 
 
 def parse_options():
@@ -110,7 +96,9 @@ def parse_options():
 
 if __name__ == "__main__":
     args = parse_options()
-    if send_slack_message(subdomain=args.s, token=args.t, channel=args.c, message=args.m, host=args.H, level=args.l, action_url=args.A, notes_url=args.N):
+    message = Message(channel=args.c)
+    message.attach(message=args.m, host=args.H, level=args.l, action_url=args.A, notes_url=args.N)
+    if message.send(subdomain=args.s, token=args.t):
         sys.exit(0)
     else:
         sys.exit(1)
