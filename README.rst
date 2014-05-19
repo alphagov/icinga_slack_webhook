@@ -16,10 +16,10 @@ Usage
 
 ::
 
-    usage: webhook.py [-h] -c CHANNEL -m MESSAGE -s SUBDOMAIN -t TOKEN
-                  [-A SERVICEACTIONURL] [-H HOST] [-L LEVEL]
-                  [-M HEADERMESSAGE] [-N SERVICENOTESURL] [-S STATUSCGIURL]
-                  [-U USERNAME]
+    usage: icinga_slack_webhook_notify [-h] -c CHANNEL -m MESSAGE -s SUBDOMAIN -t TOKEN
+                                       [-A SERVICEACTIONURL] [-H HOST] [-L LEVEL]
+                                       [-M HEADERMESSAGE] [-N SERVICENOTESURL] [-S STATUSCGIURL]
+                                       [-U USERNAME]
 
     Send an Icinga Alert to Slack.com via a generic webhook integration
 
@@ -38,3 +38,4 @@ Usage
       -S STATUSCGIURL      The URL of status.cgi for your Nagios/Icinga instance
                            {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}
       -U USERNAME          Username to send the message from {default: Icinga}
+      -V                   Display version information
