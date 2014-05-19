@@ -9,6 +9,7 @@ class TestCommon(unittest.TestCase):
         self.example_attachment_field2 = {"title": "My Second Title", "value": "My Second Value", "short": True}
         self.example_attachment_field_list = [self.example_attachment_field]
         self.example_attachment_field_list2 = [self.example_attachment_field, self.example_attachment_field2]
+        self.example_attachment = {"fallback": "Fallback Message", "fields": self.example_attachment_field_list, "test": "Example Text", "pretext": "Example pretext", "color": "#FF0000"}
 
 class TestAttachmentField(TestCommon):
 
@@ -41,10 +42,46 @@ class TestAttachmentFieldList(TestCommon):
 class TestAttachment(TestCommon):
 
     def test_attachment_with_defaults(self):
-        attachment = Attachment("Fallback Message", self.example_attachment_field_list)
+        self.attachment = Attachment("Fallback Message", self.example_attachment_field_list)
+        self.assertEqual(self.attachment['fallback'], "Fallback Message")
+        self.assertEqual(self.attachment['fields'], self.example_attachment_field_list )
 
     def test_attachment_with_optionals(self):
-        attachment = Attachment("Fallback Message", self.example_attachment_field_list, "Text", "Pretext", "#FF0000")
+        self.attachment = Attachment("Fallback Message", self.example_attachment_field_list, "Text", "Pretext", "#FF0000")
+        self.assertEqual(self.attachment['text'], "Text")
+        self.assertEqual(self.attachment['pretext'], "Pretext")
+        self.assertEqual(self.attachment['color'], "#FF0000")
+
+class TestAttachmentList(TestCommon):
+
+    def test_single_attachment_list(self):
+        self.attachment_list = AttachmentList(self.example_attachment)
+        self.assertEqual(len(self.attachment_list), 1)
+
+    def test_two_attachment_list(self):
+        self.attachment_list = AttachmentList(self.example_attachment, self.example_attachment)
+        self.assertEqual(len(self.attachment_list), 2)
+
+
+
+class TestMessage(TestCommon):
+
+    def test_message_mandatory_options(self):
+        self.message = Message("#webops", "test message", "username")
+        self.assertEqual(self.message['channel'], "#webops")
+        self.assertEqual(self.message['text'], "test message")
+        self.assertEqual(self.message['username'], "username")
+
+    def test_message_attachment(self):
+        self.message = Message("#webops", "test message", "username")
+        self.message.attach("message", "hostname.domain", "CRITICAL")
+        self.assertEqual(len(self.message['attachments']), 1)
+
+    def test_message_multiple_attachment(self):
+        self.message = Message("#webops", "test message", "username")
+        self.message.attach("message", "hostname.domain", "CRITICAL")
+        self.message.attach("message2", "hostname.domain", "CRITICAL")
+        self.assertEqual(len(self.message['attachments']), 2)
 
 
 if __name__ == '__main__':
