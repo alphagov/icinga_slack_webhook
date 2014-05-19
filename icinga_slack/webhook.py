@@ -5,6 +5,8 @@ import json
 import urllib
 import sys
 
+from icinga_slack import __version__
+
 alert_colors = {'UNKNOWN': '#6600CC',
                 'CRITICAL': '#FF0000',
                 'WARNING': '#FF9900',
@@ -97,11 +99,12 @@ def parse_options():
     parser.add_argument('-S', metavar="STATUSCGIURL", type=str, default='https://nagios.example.com/cgi-bin/icinga/status.cgi',
                         help="The URL of status.cgi for your Nagios/Icinga instance {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}")
     parser.add_argument('-U', metavar="USERNAME", type=str, default="Icinga", help="Username to send the message from {default: Icinga}")
+    parser.add_argument('-V', action='version', help="Print version information", version="version: {0}".format(__version__))
     args = parser.parse_args()
     return args
 
 
-if __name__ == "__main__":
+def main():
     args = parse_options()
     message = Message(channel=args.c, text=args.M, username=args.U)
     message.attach(message=args.m, host=args.H, level=args.L, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
@@ -109,3 +112,7 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
