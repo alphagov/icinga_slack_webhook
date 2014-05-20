@@ -3,13 +3,15 @@ icinga-slack-webhook
 
 A script to send notifications to Slack.com from Nagios or Icinga via the generic webhook integration
 
-.. image:: https://travis-ci.org/samjsharpe/icinga_slack_webhook.png?branch=master
-   :target: https://travis-ci.org/samjsharpe/icinga_slack_webhook
+.. image:: https://travis-ci.org/alphagov/icinga_slack_webhook.png?branch=master
+   :target: https://travis-ci.org/alphagov/icinga_slack_webhook
+
+The `homepage is on Github <https://github.com/alphagov/icinga_slack_webhook>`_
 
 Installation
 ------------
 
-    $ pip install icinga-slack-webhook`
+    $ pip install icinga-slack-webhook
 
 Usage
 -----
