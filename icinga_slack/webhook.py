@@ -10,7 +10,7 @@ from icinga_slack import __version__
 alert_colors = {'UNKNOWN': '#6600CC',
                 'CRITICAL': '#FF0000',
                 'WARNING': '#FF9900',
-                'OK': '#00FF00'}
+                'OK': '#36A64F'}
 
 
 class AttachmentField(dict):
