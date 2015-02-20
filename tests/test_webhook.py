@@ -77,6 +77,13 @@ class TestMessage(TestCommon):
         self.message.attach("message", "hostname.domain", "CRITICAL")
         self.assertEqual(len(self.message['attachments']), 1)
 
+    def test_message_attachment_expand(self):
+        self.message = Message("#webops", "test message", "username")
+        self.message.attach(r'foo\nbar', "hostname.domain", "CRITICAL", expand=True)
+        self.message.attach(r'foo\nbar', "hostname.domain", "CRITICAL", expand=False)
+        self.assertTrue('foo\nbar' in self.message['attachments'][0]['text'])
+        self.assertTrue(r'foo\nbar' in self.message['attachments'][1]['text'])
+
     def test_message_multiple_attachment(self):
         self.message = Message("#webops", "username", "test message")
         self.message.attach("message", "hostname.domain", "CRITICAL")

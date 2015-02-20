@@ -85,9 +85,12 @@ class Message(dict):
             action_url=None,
             notes_url=None,
             status_cgi_url='',
-            extinfo_cgi_url=''
+            extinfo_cgi_url='',
+            expand=False
     ):
         fields = AttachmentFieldList()
+        if expand:
+            message = message.replace(r'\n', "\n").replace(r'\t', "\t")
 
         host_notification = bool(host_state)
 
@@ -242,6 +245,12 @@ def parse_options():
         help="Username to send the message from {default: Icinga}"
     )
     parser.add_argument(
+        '-e',
+        action='store_true',
+        default=False,
+        help="Enable interpretation of backslash escapes"
+    )
+    parser.add_argument(
         '-V', '--version',
         action='version',
         help="Print version information",
@@ -266,7 +275,8 @@ def main():
         action_url=args.service_action_url,
         notes_url=args.service_notes_url,
         status_cgi_url=args.status_cgi_url,
-        extinfo_cgi_url=args.extinfo_cgi_url
+        extinfo_cgi_url=args.extinfo_cgi_url,
+        expand=args.e
     )
 
     if args.print_payload:
