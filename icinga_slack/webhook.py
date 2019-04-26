@@ -73,9 +73,9 @@ class Message(dict):
         alert_attachment = Attachment(fallback="    {0} on {1} is {2}".format(message, host, level), color=color, fields=fields)
         self['attachments'].append(alert_attachment)
 
-    def send(self, subdomain, token):
+    def send(self, webhook_url):
         data = urllib.urlencode({"payload": json.dumps(self)})
-        response = urllib.urlopen('https://{0}.slack.com/services/hooks/incoming-webhook?token={1}'.format(subdomain, token), data).read()
+        response = urllib.urlopen(webhook_url, data).read()
         if response == "ok":
             return True
         else:
@@ -87,8 +87,7 @@ def parse_options():
     parser = argparse.ArgumentParser(description="Send an Icinga Alert to Slack.com via a generic webhook integration")
     parser.add_argument('-c', metavar="CHANNEL", type=str, required=True, help="The channel to send the message to")
     parser.add_argument('-m', metavar="MESSAGE", type=str, required=True, help="The text of the message to send")
-    parser.add_argument('-s', metavar="SUBDOMAIN", type=str, required=True, help="Slack.com subdomain")
-    parser.add_argument('-t', metavar="TOKEN", type=str, required=True, help="The access token for your integration")
+    parser.add_argument('-u', metavar="WEBHOOKURL", type=str, required=True, help="The webhook URL for your integration")
     parser.add_argument('-A', metavar="SERVICEACTIONURL", type=str, default=None, help="An optional action_url for this alert {default: None}")
     parser.add_argument('-H', metavar="HOST", type=str, default="UNKNOWN", help="An optional host the message relates to {default: UNKNOWN}")
     parser.add_argument('-L', metavar="LEVEL", type=str, choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"], default="UNKNOWN",
@@ -108,7 +107,7 @@ def main():
     args = parse_options()
     message = Message(channel=args.c, text=args.M, username=args.U)
     message.attach(message=args.m, host=args.H, level=args.L, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
-    if message.send(subdomain=args.s, token=args.t):
+    if message.send(webhook_url=args.u):
         sys.exit(0)
     else:
         sys.exit(1)
