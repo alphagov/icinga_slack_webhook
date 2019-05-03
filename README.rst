@@ -29,8 +29,7 @@ Usage
       -h, --help           show this help message and exit
       -c CHANNEL           The channel to send the message to
       -m MESSAGE           The text of the message to send
-      -s SUBDOMAIN         Slack.com subdomain
-      -t TOKEN             The access token for your integration
+      -u WEBHOOKURL        The webhook URL for your integration
       -A SERVICEACTIONURL  An optional action_url for this alert {default: None}
       -H HOST              An optional host the message relates to {default: UNKNOWN}
       -L LEVEL             An optional alert level {default: UNKNOWN}
@@ -40,4 +39,4 @@ Usage
       -S STATUSCGIURL      The URL of status.cgi for your Nagios/Icinga instance
                            {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}
       -U USERNAME          Username to send the message from {default: Icinga}
-      -V                   Display version information
+      -V                   Print version information
