@@ -2,7 +2,8 @@
 
 import argparse
 import json
-import urllib
+import urllib.parse
+import urllib.request
 import sys
 
 from icinga_slack import __version__
@@ -74,12 +75,12 @@ class Message(dict):
         self['attachments'].append(alert_attachment)
 
     def send(self, webhook_url):
-        data = urllib.urlencode({"payload": json.dumps(self)})
-        response = urllib.urlopen(webhook_url, data).read()
-        if response == "ok":
+        data = urllib.parse.urlencode({"payload": json.dumps(self)})
+        response = urllib.request.urlopen(webhook_url, data.encode('utf8')).read()
+        if response == b'ok':
             return True
         else:
-            print "Error: %s" % response
+            print("Error: %s" % response)
             return False
 
 
