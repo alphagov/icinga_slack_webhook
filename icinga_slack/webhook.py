@@ -85,7 +85,10 @@ class Message(dict):
 
 
 def parse_options():
-    parser = argparse.ArgumentParser(description="Send an Icinga Alert to Slack.com via a generic webhook integration")
+    parser = argparse.ArgumentParser(
+        prog="icinga_slack_webhook_notify",
+        description="Send an Icinga Alert to Slack.com via a generic webhook integration"
+    )
     parser.add_argument('-c', metavar="CHANNEL", type=str, required=True, help="The channel to send the message to")
     parser.add_argument('-m', metavar="MESSAGE", type=str, required=True, help="The text of the message to send")
     parser.add_argument('-u', metavar="WEBHOOKURL", type=str, required=True, help="The webhook URL for your integration")
