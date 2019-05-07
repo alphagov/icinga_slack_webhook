@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import json
-import urllib
+import urllib.parse
+import urllib.request
 import sys
 
 from icinga_slack import __version__
@@ -74,17 +75,20 @@ class Message(dict):
         self['attachments'].append(alert_attachment)
 
     def send(self, webhook_url):
-        data = urllib.urlencode({"payload": json.dumps(self)})
-        response = urllib.urlopen(webhook_url, data).read()
-        if response == "ok":
+        data = urllib.parse.urlencode({"payload": json.dumps(self)})
+        response = urllib.request.urlopen(webhook_url, data.encode('utf8')).read()
+        if response == b'ok':
             return True
         else:
-            print "Error: %s" % response
+            print("Error: %s" % response)
             return False
 
 
 def parse_options():
-    parser = argparse.ArgumentParser(description="Send an Icinga Alert to Slack.com via a generic webhook integration")
+    parser = argparse.ArgumentParser(
+        prog="icinga_slack_webhook_notify",
+        description="Send an Icinga Alert to Slack.com via a generic webhook integration"
+    )
     parser.add_argument('-c', metavar="CHANNEL", type=str, required=True, help="The channel to send the message to")
     parser.add_argument('-m', metavar="MESSAGE", type=str, required=True, help="The text of the message to send")
     parser.add_argument('-u', metavar="WEBHOOKURL", type=str, required=True, help="The webhook URL for your integration")
