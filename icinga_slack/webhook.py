@@ -102,10 +102,13 @@ class Message(dict):
 
         if host_display_name or host:
             host_and_service_text.append(
-                "*Host:* " +  abbreviate_url("{0}?host={1}".format(
-                    status_cgi_url,
-                    host_display_name
-                ))
+                "*Host:* " +  abbreviate_url(
+                    "{0}?host={1}".format(
+                        status_cgi_url,
+                        host_display_name
+                    ),
+                    label=host_display_name
+                )
             )
 
         fields.append(
