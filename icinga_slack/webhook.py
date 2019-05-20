@@ -121,10 +121,17 @@ def parse_options():
         required=True,
         help="The text of the message to send"
     )
-    parser.add_argument(
+    destination_group = parser.add_mutually_exclusive_group()
+    destination_group.add_argument(
         '-u', '--web-hook-url',
-        required=True,
         help="The webhook URL for your integration"
+    )
+    destination_group.add_argument(
+        '-p', '--print-payload',
+        action='store_const',
+        const=True,
+        default=False,
+        help="Rather than sending the payload to Slack, print it to STDOUT"
     )
     parser.add_argument(
         '-A', '--service-action-url',
@@ -176,10 +183,14 @@ def main():
     args = parse_options()
     message = Message(channel=args.c, text=args.M, username=args.U)
     message.attach(message=args.m, host=args.H, level=args.L, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
-    if message.send(webhook_url=args.u):
-        sys.exit(0)
+
+    if args.print_payload:
+        print(json.dumps(message, indent=True))
     else:
-        sys.exit(1)
+        if message.send(webhook_url=args.web_hook_url):
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
 
 if __name__ == "__main__":
