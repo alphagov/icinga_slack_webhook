@@ -89,22 +89,65 @@ def parse_options():
         prog="icinga_slack_webhook_notify",
         description="Send an Icinga Alert to Slack.com via a generic webhook integration"
     )
-    parser.add_argument('-c', metavar="CHANNEL", type=str, required=True, help="The channel to send the message to")
-    parser.add_argument('-m', metavar="MESSAGE", type=str, required=True, help="The text of the message to send")
-    parser.add_argument('-u', metavar="WEBHOOKURL", type=str, required=True, help="The webhook URL for your integration")
-    parser.add_argument('-A', metavar="SERVICEACTIONURL", type=str, default=None, help="An optional action_url for this alert {default: None}")
-    parser.add_argument('-H', metavar="HOST", type=str, default="UNKNOWN", help="An optional host the message relates to {default: UNKNOWN}")
-    parser.add_argument('-L', metavar="LEVEL", type=str, choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"], default="UNKNOWN",
-                        help="An optional alert level {default: UNKNOWN}")
-    parser.add_argument('-M', metavar="HEADERMESSAGE", type=str, default="I have received the following alert:",
-                        help="A header message sent before the formatted alert {default: I have received the following alert:}")
-    parser.add_argument('-N', metavar="SERVICENOTESURL", type=str, default=None, help="An optional notes_url for this alert {default: None}")
-    parser.add_argument('-S', metavar="STATUSCGIURL", type=str, default='https://nagios.example.com/cgi-bin/icinga/status.cgi',
-                        help="The URL of status.cgi for your Nagios/Icinga instance {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}")
-    parser.add_argument('-U', metavar="USERNAME", type=str, default="Icinga", help="Username to send the message from {default: Icinga}")
-    parser.add_argument('-V', action='version', help="Print version information", version="version: {0}".format(__version__))
-    args = parser.parse_args()
-    return args
+    parser.add_argument(
+        '-c', '--channel',
+        required=True,
+        help="The channel to send the message to"
+    )
+    parser.add_argument(
+        '-m', '--message',
+        required=True,
+        help="The text of the message to send"
+    )
+    parser.add_argument(
+        '-u', '--web-hook-url',
+        required=True,
+        help="The webhook URL for your integration"
+    )
+    parser.add_argument(
+        '-A', '--service-action-url',
+        default=None,
+        help="An optional action_url for this alert {default: None}"
+    )
+    parser.add_argument(
+        '-H', '--host',
+        default="UNKNOWN",
+        help="An optional host the message relates to {default: UNKNOWN}"
+    )
+    parser.add_argument(
+        '-L', '--level',
+        choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"],
+        default="UNKNOWN",
+        help="An optional alert level {default: UNKNOWN}"
+    )
+    parser.add_argument(
+        '-M', '--header-message',
+        default="I have received the following alert:",
+        help="A header message sent before the formatted alert {default: I have received the following alert:}"
+    )
+    parser.add_argument(
+        '-N', '--service-notes-url',
+        default=None,
+        help="An optional notes_url for this alert {default: None}"
+    )
+    parser.add_argument(
+        '-S', '--status-cgi-url',
+        default='https://nagios.example.com/cgi-bin/icinga/status.cgi',
+        help="The URL of status.cgi for your Nagios/Icinga instance {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}"
+    )
+    parser.add_argument(
+        '-U', '--username',
+        default="Icinga",
+        help="Username to send the message from {default: Icinga}"
+    )
+    parser.add_argument(
+        '-V', '--version',
+        action='version',
+        help="Print version information",
+        version=__version__
+    )
+
+    return parser.parse_args()
 
 
 def main():
