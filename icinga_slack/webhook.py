@@ -81,9 +81,21 @@ class Message(dict):
         )
         fields.append(AttachmentField("Level", level, True))
         if action_url:
-            fields.append(AttachmentField("Actions URL", action_url, True))
+            fields.append(
+                AttachmentField(
+                    "Actions URL",
+                    abbreviate_url(action_url),
+                    True
+                )
+            )
         if notes_url:
-            fields.append(AttachmentField("Notes URL", notes_url, True))
+            fields.append(
+                AttachmentField(
+                    "Notes URL",
+                    abbreviate_url(notes_url),
+                    True
+                )
+            )
         if level in alert_colors.keys():
             color = alert_colors[level]
         else:
