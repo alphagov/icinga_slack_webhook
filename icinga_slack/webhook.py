@@ -72,7 +72,6 @@ class Message(dict):
             status_cgi_url=''
     ):
         fields = AttachmentFieldList()
-        fields.append(AttachmentField("Message", message))
         fields.append(
             AttachmentField(
                 "Host",
@@ -153,11 +152,6 @@ def parse_options():
         help="An optional alert level {default: UNKNOWN}"
     )
     parser.add_argument(
-        '-M', '--header-message',
-        default="I have received the following alert:",
-        help="A header message sent before the formatted alert {default: I have received the following alert:}"
-    )
-    parser.add_argument(
         '-N', '--service-notes-url',
         default=None,
         help="An optional notes_url for this alert {default: None}"
@@ -184,8 +178,17 @@ def parse_options():
 
 def main():
     args = parse_options()
-    message = Message(channel=args.c, text=args.M, username=args.U)
-    message.attach(message=args.m, host=args.H, level=args.L, action_url=args.A, notes_url=args.N, status_cgi_url=args.S)
+    message = Message(
+        channel=args.channel, text=args.message, username=args.username
+    )
+    message.attach(
+        message=args.message,
+        host=args.host,
+        level=args.level,
+        action_url=args.service_action_url,
+        notes_url=args.service_notes_url,
+        status_cgi_url=args.status_cgi_url
+    )
 
     if args.print_payload:
         print(json.dumps(message, indent=True))
