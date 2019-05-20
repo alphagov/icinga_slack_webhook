@@ -19,6 +19,7 @@ Usage
 ::
     usage: icinga_slack_webhook_notify [-h] -c CHANNEL -m MESSAGE [-u WEB_HOOK_URL | -p]
                                        [-A SERVICE_ACTION_URL] [-H HOST] [-d HOST_DISPLAY_NAME]
+                                       [--host-state HOST_STATE]
                                        [-L {OK,WARNING,CRITICAL,UNKNOWN}] [-N SERVICE_NOTES_URL]
                                        [-S STATUS_CGI_URL] [-E EXTINFO_CGI_URL] [-U USERNAME]
                                        [-V]
@@ -39,6 +40,8 @@ Usage
       -H HOST, --host HOST  An optional host the message relates to
       -d HOST_DISPLAY_NAME, --host-display-name HOST_DISPLAY_NAME
                             An optional display name for the host the message relates to
+      --host-state HOST_STATE
+                            An optional state the host is in, use this for host alerts
       -L {OK,WARNING,CRITICAL,UNKNOWN}, --level {OK,WARNING,CRITICAL,UNKNOWN}
                             An optional alert level {default: UNKNOWN}
       -N SERVICE_NOTES_URL, --service-notes-url SERVICE_NOTES_URL

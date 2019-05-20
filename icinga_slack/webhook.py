@@ -11,7 +11,10 @@ from icinga_slack import __version__
 alert_colors = {'UNKNOWN': '#6600CC',
                 'CRITICAL': '#FF0000',
                 'WARNING': '#FF9900',
-                'OK': '#36A64F'}
+                'OK': '#36A64F',
+                'UP': '#36A64F',
+                'DOWN': '#FF0000',
+                'UNREACHABLE': '#6600CC'}
 
 MAX_URL_LENGTH = 22
 
@@ -76,6 +79,7 @@ class Message(dict):
             level,
             host = None,
             host_display_name = None,
+            host_state = None,
             action_url=None,
             notes_url=None,
             status_cgi_url='',
@@ -84,7 +88,7 @@ class Message(dict):
         fields = AttachmentFieldList()
 
         host_and_service_text = []
-        if host and extinfo_cgi_url:
+        if not host_state and host and extinfo_cgi_url:
             host_and_service_text.append(
                 "*Service:* " + abbreviate_url(
                     "{0}?type=2&host={1}&service={2}".format(
@@ -125,10 +129,7 @@ class Message(dict):
                 short=True
             )
         )
-        if level in alert_colors.keys():
-            color = alert_colors[level]
-        else:
-            color = alert_colors['UNKNOWN']
+        color = alert_colors.get(host_state or level, alert_colors['UNKNOWN'])
         alert_attachment = Attachment(
             fallback="    {0} on {1} is {2}".format(message, host_display_name, level),
             mrkdwn_in=['fields'],
@@ -191,6 +192,10 @@ def parse_options():
         help="An optional display name for the host the message relates to"
     )
     parser.add_argument(
+        '--host-state',
+        help="An optional state the host is in, use this for host alerts"
+    )
+    parser.add_argument(
         '-L', '--level',
         choices=["OK", "WARNING", "CRITICAL", "UNKNOWN"],
         default="UNKNOWN",
@@ -229,13 +234,14 @@ def main():
     args = parse_options()
     message = Message(
         channel=args.channel,
-        text="*{0}*: {1}".format(args.level, args.message),
+        text="*{0}*: {1}".format((args.host_state or args.level), args.message),
         username=args.username
     )
     message.attach(
         message=args.message,
         host=args.host,
         host_display_name=args.host_display_name,
+        host_state=args.host_state,
         level=args.level,
         action_url=args.service_action_url,
         notes_url=args.service_notes_url,
