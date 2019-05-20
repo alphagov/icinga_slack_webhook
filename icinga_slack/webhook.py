@@ -26,9 +26,11 @@ def abbreviate_url(url):
     return "<{0}|{1}>".format(url, hostname)
 
 class AttachmentField(dict):
-    def __init__(self, title, value, short=False):
-        self['title'] = title
+    def __init__(self, value, title=None, short=False):
         self['value'] = value
+
+        if title:
+            self['title'] = title
         self['short'] = short
 
 
@@ -71,43 +73,65 @@ class Message(dict):
     def attach(
             self,
             message,
-            host,
             level,
+            host = None,
+            host_display_name = None,
             action_url=None,
             notes_url=None,
-            status_cgi_url=''
+            status_cgi_url='',
+            extinfo_cgi_url=''
     ):
         fields = AttachmentFieldList()
+
+        host_and_service_text = []
+        if host and extinfo_cgi_url:
+            host_and_service_text.append(
+                "*Service:* " + abbreviate_url(
+                    "{0}?type=2&host={1}&service={2}".format(
+                        extinfo_cgi_url,
+                        host,
+                        message
+                    )
+                )
+            )
+
+        if host_display_name or host:
+            host_and_service_text.append(
+                "*Host:* " +  abbreviate_url("{0}?host={1}".format(
+                    status_cgi_url,
+                    host_display_name
+                ))
+            )
+
         fields.append(
             AttachmentField(
-                "Host",
-                abbreviate_url("{0}?host={1}".format(status_cgi_url, host)),
-                True
+                "\n".join(host_and_service_text),
+                short=True
             )
         )
-        fields.append(AttachmentField("Level", level, True))
+
+        links_text = []
         if action_url:
-            fields.append(
-                AttachmentField(
-                    "Actions URL",
-                    abbreviate_url(action_url),
-                    True
-                )
+            links_text.append(
+                "*Action:* {0}".format(abbreviate_url(action_url))
             )
         if notes_url:
-            fields.append(
-                AttachmentField(
-                    "Notes URL",
-                    abbreviate_url(notes_url),
-                    True
-                )
+            links_text.append(
+                "*Notes:* {0}".format(abbreviate_url(notes_url))
             )
+        fields.append(
+            AttachmentField(
+                "\n".join(links_text),
+                short=True
+            )
+        )
         if level in alert_colors.keys():
             color = alert_colors[level]
         else:
             color = alert_colors['UNKNOWN']
         alert_attachment = Attachment(
-            fallback="    {0} on {1} is {2}".format(message, host, level),
+            fallback="    {0} on {1} is {2}".format(message, host_display_name, level),
+            mrkdwn_in=['fields'],
             color=color,
             fields=fields
         )
@@ -160,8 +184,11 @@ def parse_options():
     )
     parser.add_argument(
         '-H', '--host',
-        default="UNKNOWN",
-        help="An optional host the message relates to {default: UNKNOWN}"
+        help="An optional host the message relates to"
+    )
+    parser.add_argument(
+        '-d', '--host-display-name',
+        help="An optional display name for the host the message relates to"
     )
     parser.add_argument(
         '-L', '--level',
@@ -178,6 +205,10 @@ def parse_options():
         '-S', '--status-cgi-url',
         default='https://nagios.example.com/cgi-bin/icinga/status.cgi',
         help="The URL of status.cgi for your Nagios/Icinga instance {default: https://nagios.example.com/cgi-bin/icinga/status.cgi}"
+    )
+    parser.add_argument(
+        '-E', '--extinfo-cgi-url',
+        help="The URL of extinfo.cgi for your Nagios/Icinga instance"
     )
     parser.add_argument(
         '-U', '--username',
@@ -197,15 +228,19 @@ def parse_options():
 def main():
     args = parse_options()
     message = Message(
-        channel=args.channel, text=args.message, username=args.username
+        channel=args.channel,
+        text="*{0}*: {1}".format(args.level, args.message),
+        username=args.username
     )
     message.attach(
         message=args.message,
         host=args.host,
+        host_display_name=args.host_display_name,
         level=args.level,
         action_url=args.service_action_url,
         notes_url=args.service_notes_url,
-        status_cgi_url=args.status_cgi_url
+        status_cgi_url=args.status_cgi_url,
+        extinfo_cgi_url=args.extinfo_cgi_url
     )
 
     if args.print_payload:
