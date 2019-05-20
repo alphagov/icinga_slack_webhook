@@ -13,10 +13,17 @@ alert_colors = {'UNKNOWN': '#6600CC',
                 'WARNING': '#FF9900',
                 'OK': '#36A64F'}
 
+MAX_URL_LENGTH = 22
+
 def abbreviate_url(url):
     parsed_url = urllib.parse.urlparse(url)
 
-    return "<{0}|{1}>".format(url, parsed_url.netloc)
+    hostname = parsed_url.netloc
+
+    if len(hostname) > MAX_URL_LENGTH:
+        hostname = (hostname[:MAX_URL_LENGTH - 2] + '..')
+
+    return "<{0}|{1}>".format(url, hostname)
 
 class AttachmentField(dict):
     def __init__(self, title, value, short=False):
