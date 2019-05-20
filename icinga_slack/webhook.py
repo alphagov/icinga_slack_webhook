@@ -13,6 +13,10 @@ alert_colors = {'UNKNOWN': '#6600CC',
                 'WARNING': '#FF9900',
                 'OK': '#36A64F'}
 
+def abbreviate_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+
+    return "<{0}|{1}>".format(url, parsed_url.netloc)
 
 class AttachmentField(dict):
     def __init__(self, title, value, short=False):
