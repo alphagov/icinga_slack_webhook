@@ -73,9 +73,12 @@ class Message(dict):
     ):
         fields = AttachmentFieldList()
         fields.append(AttachmentField("Message", message))
-        fields.append(AttachmentField(
-            "Host", "<{1}?host={0}|{0}>".format(host, status_cgi_url),
-            True)
+        fields.append(
+            AttachmentField(
+                "Host",
+                abbreviate_url("{0}?host={1}".format(status_cgi_url, host)),
+                True
+            )
         )
         fields.append(AttachmentField("Level", level, True))
         if action_url:
