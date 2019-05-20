@@ -58,10 +58,21 @@ class Message(dict):
             self['icon_emoji'] = icon_emoji
         self['attachments'] = AttachmentList()
 
-    def attach(self, message, host, level, action_url=None, notes_url=None, status_cgi_url=''):
+    def attach(
+            self,
+            message,
+            host,
+            level,
+            action_url=None,
+            notes_url=None,
+            status_cgi_url=''
+    ):
         fields = AttachmentFieldList()
         fields.append(AttachmentField("Message", message))
-        fields.append(AttachmentField("Host", "<{1}?host={0}|{0}>".format(host, status_cgi_url), True))
+        fields.append(AttachmentField(
+            "Host", "<{1}?host={0}|{0}>".format(host, status_cgi_url),
+            True)
+        )
         fields.append(AttachmentField("Level", level, True))
         if action_url:
             fields.append(AttachmentField("Actions URL", action_url, True))
@@ -71,12 +82,19 @@ class Message(dict):
             color = alert_colors[level]
         else:
             color = alert_colors['UNKNOWN']
-        alert_attachment = Attachment(fallback="    {0} on {1} is {2}".format(message, host, level), color=color, fields=fields)
+        alert_attachment = Attachment(
+            fallback="    {0} on {1} is {2}".format(message, host, level),
+            color=color,
+            fields=fields
+        )
         self['attachments'].append(alert_attachment)
 
     def send(self, webhook_url):
         data = urllib.parse.urlencode({"payload": json.dumps(self)})
-        response = urllib.request.urlopen(webhook_url, data.encode('utf8')).read()
+        response = urllib.request.urlopen(
+            webhook_url,
+            data.encode('utf8')
+        ).read()
         if response == b'ok':
             return True
         else:
