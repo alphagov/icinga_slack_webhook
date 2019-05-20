@@ -39,8 +39,9 @@ class AttachmentFieldList(list):
 
 
 class Attachment(dict):
-    def __init__(self, fallback, fields, text=None, pretext=None, color=None):
+    def __init__(self, fallback, fields, mrkdwn_in=[], text=None, pretext=None, color=None):
         self['fallback'] = fallback
+        self['mrkdwn_in'] = mrkdwn_in
         self['fields'] = fields
         if text:
             self['text'] = text

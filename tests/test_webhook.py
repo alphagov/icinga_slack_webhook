@@ -47,7 +47,7 @@ class TestAttachment(TestCommon):
         self.assertEqual(self.attachment['fields'], self.example_attachment_field_list )
 
     def test_attachment_with_optionals(self):
-        self.attachment = Attachment("Fallback Message", self.example_attachment_field_list, "Text", "Pretext", "#FF0000")
+        self.attachment = Attachment("Fallback Message", self.example_attachment_field_list, [], "Text", "Pretext", "#FF0000")
         self.assertEqual(self.attachment['text'], "Text")
         self.assertEqual(self.attachment['pretext'], "Pretext")
         self.assertEqual(self.attachment['color'], "#FF0000")
