@@ -50,12 +50,10 @@ class AttachmentList(list):
 
 
 class Message(dict):
-    def __init__(self, channel, text, username, mrkdwn_in=["fields"],
+    def __init__(self, channel, text, username,
                  icon_emoji=":ghost:", attachments=None):
         self['channel'] = channel
         self['text'] = text
-        if mrkdwn_in:
-            self['mrkdwn_in'] = mrkdwn_in
         if username:
             self['username'] = username
         if icon_emoji:
