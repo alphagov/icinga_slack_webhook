@@ -64,10 +64,11 @@ class AttachmentList(list):
 
 
 class Message(dict):
-    def __init__(self, channel, text, username,
+    def __init__(self, channel, username, text=None,
                  icon_emoji=":ghost:", attachments=None):
         self['channel'] = channel
-        self['text'] = text
+        if text:
+            self['text'] = text
         if username:
             self['username'] = username
         if icon_emoji:
@@ -88,55 +89,71 @@ class Message(dict):
     ):
         fields = AttachmentFieldList()
 
-        host_and_service_text = []
-        if not host_state and host and extinfo_cgi_url:
-            host_and_service_text.append(
-                "*Service:* " + abbreviate_url(
-                    "{0}?type=2&host={1}&service={2}".format(
-                        extinfo_cgi_url,
-                        host,
-                        message
-                    )
-                )
-            )
-
-        if host_display_name or host:
-            host_and_service_text.append(
-                "*Host:* " +  abbreviate_url(
-                    "{0}?host={1}".format(
-                        status_cgi_url,
-                        host_display_name
-                    ),
-                    label=host_display_name
-                )
-            )
-
-        fields.append(
-            AttachmentField(
-                "\n".join(host_and_service_text),
-                short=True
-            )
-        )
+        host_notification = bool(host_state)
 
         links_text = []
         if action_url:
             links_text.append(
-                "*Action:* {0}".format(abbreviate_url(action_url))
+                "Action: {0}".format(abbreviate_url(action_url))
             )
         if notes_url:
             links_text.append(
-                "*Notes:* {0}".format(abbreviate_url(notes_url))
+                "Notes: {0}".format(abbreviate_url(notes_url))
             )
         fields.append(
             AttachmentField(
                 "\n".join(links_text),
-                short=True
+                # If this is a service notification, then use a short
+                # attachment so the host can display to the side.
+                short=(not host_notification)
             )
         )
+
+        main_link = None
+        if host_state:
+            main_link = abbreviate_url(
+                "{0}?host={1}".format(
+                    status_cgi_url,
+                    host_display_name
+                ),
+                label=message,
+                max_url_length=None
+            )
+        else:
+            if host and extinfo_cgi_url:
+                main_link = abbreviate_url(
+                    "{0}?type=2&host={1}&service={2}".format(
+                        extinfo_cgi_url,
+                        host,
+                        message
+                    ),
+                    label=message,
+                    max_url_length=None
+                )
+
+            fields.append(
+                AttachmentField(
+                    "Host: " +  abbreviate_url(
+                        "{0}?host={1}".format(
+                            status_cgi_url,
+                            host_display_name
+                        ),
+                        label=host_display_name
+                    ),
+                    short=True
+                )
+            )
+
+        text = "*{0}*: {1}".format(
+            (host_state or level),
+            (main_link or message)
+        )
+
         color = alert_colors.get(host_state or level, alert_colors['UNKNOWN'])
         alert_attachment = Attachment(
             fallback="    {0} on {1} is {2}".format(message, host_display_name, level),
-            mrkdwn_in=['fields'],
+            text=text,
+            mrkdwn_in=['text', 'fields'],
             color=color,
             fields=fields
         )
@@ -238,7 +255,6 @@ def main():
     args = parse_options()
     message = Message(
         channel=args.channel,
-        text="*{0}*: {1}".format((args.host_state or args.level), args.message),
         username=args.username
     )
     message.attach(

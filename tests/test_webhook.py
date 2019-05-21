@@ -67,18 +67,18 @@ class TestAttachmentList(TestCommon):
 class TestMessage(TestCommon):
 
     def test_message_mandatory_options(self):
-        self.message = Message("#webops", "test message", "username")
+        self.message = Message("#webops", "username", "test message")
         self.assertEqual(self.message['channel'], "#webops")
         self.assertEqual(self.message['text'], "test message")
         self.assertEqual(self.message['username'], "username")
 
     def test_message_attachment(self):
-        self.message = Message("#webops", "test message", "username")
+        self.message = Message("#webops", "username", "test message")
         self.message.attach("message", "hostname.domain", "CRITICAL")
         self.assertEqual(len(self.message['attachments']), 1)
 
     def test_message_multiple_attachment(self):
-        self.message = Message("#webops", "test message", "username")
+        self.message = Message("#webops", "username", "test message")
         self.message.attach("message", "hostname.domain", "CRITICAL")
         self.message.attach("message2", "hostname.domain", "CRITICAL")
         self.assertEqual(len(self.message['attachments']), 2)
