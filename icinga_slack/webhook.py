@@ -18,13 +18,13 @@ alert_colors = {'UNKNOWN': '#6600CC',
 
 MAX_URL_LENGTH = 22
 
-def abbreviate_url(url, label=None):
+def abbreviate_url(url, label=None, max_url_length=MAX_URL_LENGTH):
     parsed_url = urllib.parse.urlparse(url)
 
     if label is None:
         label = parsed_url.netloc
 
-    if len(label) > MAX_URL_LENGTH:
+    if max_url_length is not None and len(label) > MAX_URL_LENGTH:
         label = (label[:MAX_URL_LENGTH - 2] + '..')
 
     return "<{0}|{1}>".format(url, label)
