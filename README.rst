@@ -17,6 +17,7 @@ Usage
 -----
 
 ::
+
     usage: icinga_slack_webhook_notify [-h] -c CHANNEL -m MESSAGE [-u WEB_HOOK_URL | -p]
                                        [-A SERVICE_ACTION_URL] [-H HOST] [-d HOST_DISPLAY_NAME]
                                        [--host-state HOST_STATE]
