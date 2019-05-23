@@ -1,5 +1,5 @@
 icinga-slack-webhook
-==============
+====================
 
 A script to send notifications to Slack.com from Nagios or Icinga via the generic webhook integration
 
