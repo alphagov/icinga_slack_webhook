@@ -55,3 +55,9 @@ Usage
       -U USERNAME, --username USERNAME
                             Username to send the message from {default: Icinga}
       -V, --version         Print version information
+
+Licence
+-------
+
+`MIT License <https://github.com/alphagov/icinga_slack_webhook/blob/main/LICENCE>`_
+
